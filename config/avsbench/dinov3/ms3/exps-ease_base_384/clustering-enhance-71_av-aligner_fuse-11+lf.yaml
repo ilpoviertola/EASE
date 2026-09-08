@@ -1,0 +1,64 @@
+trainer:
+  max_epochs: 72
+  check_val_every_n_epoch: 1
+  log_every_n_steps: 10
+  logger:
+    class_path: lightning.pytorch.loggers.wandb.WandbLogger
+    init_args:
+      resume: allow
+      project: "avs"
+      name: "avsbench_ms3_ease_dinov3_base_384_clustering-enh-71_av-aligner_11+lf"
+model:
+  class_path: training.mask_classification_ms3.MaskClassificationMS3
+  init_args:
+    warmup_steps: [50, 100]
+    lr_mult: 1.0
+    poly_power: 0.9
+    llrd_l2_enabled: False
+    attn_mask_annealing_enabled: True
+    attn_mask_annealing_start_steps: [0.20, 0.35, 0.50, 0.65]
+    attn_mask_annealing_end_steps: [0.35, 0.50, 0.65, 0.80]
+    network:
+      class_path: models.ease_vit.EASEViT
+      init_args:
+        num_q: 100
+        fusion_at_blocks: [11]
+        late_fusion: True
+        encoder:
+          class_path: models.encoders.vit.ViT
+          init_args:
+            backbone_name: "facebook/dinov3-vitb16-pretrain-lvd1689m"
+        query_generator:
+          class_path: models.query_generators.attention_generator.AttentionGenerator
+          init_args:
+            num_layers: 2
+            project_output_dim: 768
+        feat_upscaler:
+          class_path: models.feat_upscalers.conv_scaler.ConvScaler
+          init_args:
+            encoder_patch_size: [16, 16]
+            embed_dim: 768
+        audio_enhance:
+          class_path: models.query_generators.aud_enhancer_w_clustering.ClusteringTokenFeatureEnhancer
+          init_args:
+            embed_dim: 320
+            k: 71
+            aud_dim: 128
+        fuser:
+          class_path: models.fusers.av_aligner.AVAligner
+          init_args:
+            dim: 768
+            num_heads: 8
+            num_clusters: 5
+
+data:
+  class_path: datasets.avsbench_ms3.AVSBenchMS3
+  init_args:
+    read_per_frame: False
+    img_size: [384, 384]
+    num_classes: 2
+    batch_size: 8
+    num_workers: 16
+    neg_audio_p: 0.0
+    vggish_emb_fn: vggish_emb.pt
+    use_robust_for_testing_if_available: False

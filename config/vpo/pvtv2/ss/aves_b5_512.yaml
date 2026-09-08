@@ -1,0 +1,65 @@
+trainer:
+  max_epochs: 46
+  check_val_every_n_epoch: 1
+  logger:
+    class_path: lightning.pytorch.loggers.wandb.WandbLogger
+    init_args:
+      resume: allow
+      project: "avs"
+      name: "vpo_ss_ease_pvtv2_b5_512_sig"
+model:
+  class_path: training.mask_classification_s4.MaskClassificationS4
+  init_args:
+    attn_mask_annealing_enabled: True
+    attn_mask_annealing_start_steps: [4018, 6314, 8610, 10906, 13202, 15498]
+    attn_mask_annealing_end_steps: [6314, 8610, 10906, 13202, 15498, 17794]
+    llrd: 1.0
+    network:
+      class_path: models.ease_pvt.EASEPvT
+      init_args:
+        num_q: 65
+        rope_seq_len: 5
+        num_blocks: 6
+        early_fusion: True
+        encoder:
+          class_path: models.encoders.pvt.PvT
+          init_args:
+            backbone_name: pvt_v2_b5
+            prune_last_stage: True
+            num_fusion_blocks: 6
+        query_generator:
+          class_path: models.query_generators.attention_generator.AttentionGenerator
+          init_args:
+            num_layers: 4
+            embed_dim: 320
+            project_input_dim: 320
+            project_input: False
+        feat_upscaler:
+          class_path: models.feat_upscalers.conv_scaler.ConvScalerFixedDepth
+          init_args:
+            depth: 2
+            embed_dim: 320
+        audio_proj:
+          class_path: torch.nn.Linear
+          init_args:
+            in_features: 128
+            out_features: 320
+        fuser:
+          class_path: models.fusers.bi_attention.BiAttentionFuser
+          init_args:
+            vision_dim: 320
+            audio_dim: 320
+            embed_dim: 320
+            audio_token_num: 1  # for late this is num_q
+            use_sigmoid: True
+
+data:
+  class_path: datasets.vpo_ss.VPOSS
+  init_args:
+    read_per_frame: False
+    img_size: [512, 512]
+    num_classes: 2
+    batch_size: 3
+    neg_audio_p: 0.0
+    vggish_emb_fn: vggish_emb.pt
+    use_robust_for_testing_if_available: False
