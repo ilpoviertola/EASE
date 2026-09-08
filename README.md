@@ -27,19 +27,6 @@ pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https
 pip install -e .
 ```
 
-### Roihu environment setup
-
-If you are using the Roihu cluster, please follow the instructions below to set up the environment.
-
-```bash
-# Connect to GPU login node
-sinteractive
-module load tykky
-mkdir env
-conda-containerize new --prefix env roihu_env/env.yml
-conda-containerize update env --post-install roihu_env/post-install.txt
-```
-
 ## Dataset
 
 We use the AVSBench dataset for training and evaluation. Please refer to the [AVSBench repository](https://github.com/OpenNLPLab/AVSBench/tree/main) for instructions on downloading the dataset.
