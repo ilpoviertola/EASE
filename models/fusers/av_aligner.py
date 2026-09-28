@@ -136,8 +136,8 @@ class AVAligner(nn.Module):
 
         self.gumbel_clustering = GumbelSoftmaxClustering(num_clusters, dim)
 
-        self.av_cross_interaction = CrossModalInteraction(dim=dim, num_heads=num_heads)
-        self.va_cross_interaction = CrossModalInteraction(dim=dim, num_heads=num_heads)
+        self.av_cros_interaction = CrossModalInteraction(dim=dim, num_heads=num_heads)
+        self.va_cros_interaction = CrossModalInteraction(dim=dim, num_heads=num_heads)
 
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
@@ -158,7 +158,8 @@ class AVAligner(nn.Module):
         cluster_centers, _ = self.gumbel_clustering(img_fea)  # [B, img_cluster, dim]
         aud_fea = self.aud_proj(aud_fea)  # [B, K, dim]
 
-        aud_enhance_fea = self.av_cross_interaction(
+        # Step 2: Align audio and image features
+        aud_enhance_fea = self.av_cros_interaction(
             cluster_centers, aud_fea, aq=True, softmax=True
         )  # [B, k, dim]
         attention_scores = self.fc(aud_enhance_fea)  # [B, k, 1]
@@ -167,8 +168,8 @@ class AVAligner(nn.Module):
         weighted_aud_fea = attention_scores * aud_fea  # [B, k, 768]
         weighted_aud_fea = weighted_aud_fea.sum(dim=1)  # [B, 768]
 
-        # Step 6: Enhance image features based on the audio-visual similarity map
-        enhanced_img_fea = self.va_cross_interaction(
+        # Step 3: Enhance image features based on the audio-visual similarity map
+        enhanced_img_fea = self.va_cros_interaction(
             img_fea, weighted_aud_fea, aq=False, sigmoid=True
         )
 
