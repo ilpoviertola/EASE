@@ -12,6 +12,8 @@ egs/lumi/tmp/
 .trash/
 .wandb_api_key
 .hf_token
+assets/ease-checkpoints/
+assets/results/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

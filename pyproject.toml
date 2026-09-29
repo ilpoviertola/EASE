@@ -36,6 +36,8 @@ dependencies = [
   'gitignore_parser',
   'timm',
   'wandb',
+  'resampy',
+  'av'
 ]
 
 [tool.hatch.build.targets.wheel]

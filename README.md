@@ -29,6 +29,10 @@ pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https
 pip install -e .
 ```
 
+## Demo
+
+Check the `demo.ipynb` notebook for a simple demo of the EASE model. The notebook demonstrates how to run inference on a video file and visualize the audio-visual segmentation results.
+
 ## Dataset
 
 We use the AVSBench dataset (the one with v1s, v1m, and v2 subsets) for training and evaluation. Please refer to the [AVSBench repository](https://github.com/OpenNLPLab/AVSBench/tree/main) for instructions on downloading the dataset.

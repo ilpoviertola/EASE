@@ -7,7 +7,7 @@
 # ---------------------------------------------------------------
 
 import math
-from typing import Any, Optional, Union
+from typing import Optional, Union
 from pathlib import Path
 import lightning
 from lightning.fabric.utilities import rank_zero_info, rank_zero_warn
